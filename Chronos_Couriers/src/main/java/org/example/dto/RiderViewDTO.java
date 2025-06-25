@@ -12,18 +12,12 @@ public class RiderViewDTO implements TableView {
 
     @Override
     public void printHeader() {
-        System.out.printf("%-10s %-15s %-10s %-10s %-15s\n",
-                "ID", "Name", "Available", "Fragile", "Rating");
+        System.out.printf("%-10s %-15s %-10s %-10s %-15s\n", "ID", "Name", "Available", "Fragile", "Rating");
         System.out.println("--------------------------------------------------------------");
     }
 
     @Override
     public void printRow() {
-        System.out.printf("%-10s %-15s %-10s %-10s %-15.2f\n",
-                rider.getId(),
-                rider.getName(),
-                rider.isAvailable(),
-                rider.canHandleFragile(),
-                rider.getReliabilityRating());
+        System.out.printf("%-10s %-15s %-10s %-10s %-15.2f\n", rider.getId(), rider.getName(), rider.getStatus(), rider.canHandleFragile(), rider.getReliabilityRating());
     }
 }
