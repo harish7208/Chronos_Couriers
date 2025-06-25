@@ -21,24 +21,29 @@ Chronos Couriers is a console-based Java application designed to simulate a pack
 
 ---
 
-## 📂 Project Structure
-
+<details> <summary><strong>📁 Project Structure</strong> (click to expand)</summary>
 
 src/
 ├── main/
-│ ├── java/org/example/
-│ │ ├── model/ # Rider, DeliveryPackage, enums
-│ │ ├── dto/ # DTOs for views
-│ │ ├── service/ # RiderService, PackageService, DispatchCenter, AssignmentService, AuditService.
-│ │ ├── util/ # MenuHandler.java, InputValidator.java
-│ │ ├── # Main.java
-│ └── resources/
+│   ├── java/
+│   │   └── org/
+│   │       └── example/
+│   │           ├── model/           # Rider, DeliveryPackage, enums
+│   │           ├── dto/             # DTOs for views
+│   │           ├── service/         # RiderService, PackageService, DispatchCenter, AssignmentService, AuditService
+│   │           └── util/            # Main.java, MenuHandler.java, InputValidator.java
+│   └── resources/
+│
 └── test/
-└── java/org/example/service/
-├── RiderServiceTest.java
-├── PackageServiceTest.java
-├── AssignmentServiceTest.java
-└── DispatchCenterTest.java
+    └── java/
+        └── org/
+            └── example/
+                └── service/
+                    ├── AssignmentServiceTest.java
+                    ├── DispatchCenterTest.java
+                    ├── PackageServiceTest.java
+                    └── RiderServiceTest.java
+</details>
 
 
 ---
