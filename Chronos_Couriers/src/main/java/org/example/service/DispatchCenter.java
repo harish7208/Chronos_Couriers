@@ -1,23 +1,36 @@
 package org.example.service;
 
-import org.example.model.*;
+import org.example.model.DeliveryPackage;
+import org.example.model.PackagePriority;
+import org.example.model.Rider;
+import org.example.model.TableView;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
 
 public class DispatchCenter {
 
-    private static int packageCounter = 1;
-    private static int riderCounter = 1;
-    private final Map<String, DeliveryPackage> packageMap = new HashMap<>();
-    private final Map<String, Rider> riderMap = new HashMap<>();
-    private final PriorityQueue<DeliveryPackage> pendingPackages = new PriorityQueue<>(Comparator.comparing(DeliveryPackage::getPriority).reversed().thenComparing(DeliveryPackage::getDeadline).thenComparing(DeliveryPackage::getOrderTime));
-    public DispatchCenter() {
+    private final Queue<DeliveryPackage> pendingQueue;
+    private final RiderService riderService;
+    private final PackageService packageService;
+    private final AssignmentService assignmentService;
+    private final AuditService auditService;
 
-        registerRider("Alice", true, 0.95);
-        registerRider("Bob", false, 0.85);
-        registerRider("Charlie", true, 0.90);
-        registerRider("Diana", false, 0.80);
+    public DispatchCenter() {
+        this.pendingQueue = new PriorityQueue<>(
+                Comparator.comparing(DeliveryPackage::getPriority).reversed()
+                        .thenComparing(DeliveryPackage::getDeadline)
+                        .thenComparing(DeliveryPackage::getOrderTime));
+
+        this.riderService = new RiderService();
+        this.packageService = new PackageService(pendingQueue);
+        this.assignmentService = new AssignmentService(pendingQueue, riderService);
+        this.auditService = new AuditService();
+
+        riderService.seedPredefinedRiders();
     }
 
     public static void printTable(List<? extends TableView> list) {
@@ -32,128 +45,73 @@ public class DispatchCenter {
     }
 
     public String placeOrder(PackagePriority priority, long deadline, boolean fragile) {
-        String packageId = "PKG" + (packageCounter++);
-        DeliveryPackage dp = new DeliveryPackage(packageId, priority, deadline, System.currentTimeMillis(), fragile);
-        packageMap.put(packageId, dp);
-        pendingPackages.offer(dp);
-        assignPackages();
-        return packageId;
+        String id = packageService.placeOrder(priority, deadline, fragile);
+        assignmentService.assignPackages(packageService.getPackageMap());
+        return id;
     }
 
     public String registerRider(String name, boolean canHandleFragile, double reliability) {
-        String riderId = "RID" + (riderCounter++);
-        Rider rider = new Rider(riderId, name, canHandleFragile, reliability);
-        riderMap.put(riderId, rider);
-        assignPackages();
-        return riderId;
+        String id = riderService.registerRider(name, canHandleFragile, reliability);
+        assignmentService.assignPackages(packageService.getPackageMap());
+        return id;
     }
 
     public void updateRiderStatus(String riderId, boolean available) {
-        Rider rider = riderMap.get(riderId);
-        if (rider != null) {
-            rider.updateStatus(available, packageMap, pendingPackages);
-            assignPackages();
-        }
-    }
-
-    private void assignPackages() {
-        List<DeliveryPackage> assigned = new ArrayList<>();
-        for (DeliveryPackage p : pendingPackages) {
-            List<Rider> sortedRiders = riderMap.values().stream().filter(r -> r.getStatus() == RiderStatus.AVAILABLE).sorted(Comparator.comparingDouble(Rider::getReliabilityRating).reversed()).collect(Collectors.toList());
-
-            Rider selected = null;
-
-            if (p.isFragile()) {
-                selected = sortedRiders.stream().filter(Rider::canHandleFragile).findFirst().orElse(null);
-            } else {
-                selected = sortedRiders.stream().filter(r -> !r.canHandleFragile()).findFirst().orElse(sortedRiders.stream().filter(Rider::canHandleFragile).findFirst().orElse(null));
-            }
-
-            if (selected != null) {
-                p.setAssignedRiderId(selected.getId());
-                p.setStatus(PackageStatus.ASSIGNED);
-                selected.setStatus(RiderStatus.BUSY);
-                assigned.add(p);
-            }
-        }
-        pendingPackages.removeAll(assigned);
+        riderService.updateRiderStatus(riderId, available,
+                packageService.getPackageMap(), pendingQueue);
+        assignmentService.assignPackages(packageService.getPackageMap());
     }
 
     public void simulatePickup(String packageId) {
-        DeliveryPackage dp = packageMap.get(packageId);
-        if (dp != null && dp.getStatus() == PackageStatus.ASSIGNED) {
-            dp.setStatus(PackageStatus.PICKED_UP);
-            dp.setPickupTime(System.currentTimeMillis());
-        }
+        packageService.simulatePickup(packageId);
     }
 
     public void simulateDelivery(String packageId) {
-        DeliveryPackage dp = packageMap.get(packageId);
-        if (dp != null && dp.getStatus() == PackageStatus.PICKED_UP) {
-            dp.setStatus(PackageStatus.DELIVERED);
-            dp.setDeliveryTime(System.currentTimeMillis());
-            Rider rider = riderMap.get(dp.getAssignedRiderId());
-            if (rider != null) rider.setStatus(RiderStatus.AVAILABLE);
-        }
+        packageService.simulateDelivery(packageId, riderService);
     }
 
     public void cancelPackage(String packageId) {
-        DeliveryPackage dp = packageMap.get(packageId);
-        if (dp != null && dp.getStatus() != PackageStatus.DELIVERED) {
-            dp.setStatus(PackageStatus.FAILED);
-            Rider rider = riderMap.get(dp.getAssignedRiderId());
-            if (rider != null) rider.setStatus(RiderStatus.AVAILABLE);
-        }
-    }
-
-    public List<DeliveryPackage> getCancelledPackages() {
-        return packageMap.values().stream().filter(p -> p.getStatus() == PackageStatus.FAILED).collect(Collectors.toList());
+        packageService.cancelPackage(packageId, riderService);
     }
 
     public void reassignPackage(String packageId) {
-        DeliveryPackage dp = packageMap.get(packageId);
-        if (dp != null && dp.getStatus() == PackageStatus.FAILED) {
-            dp.setStatus(PackageStatus.PENDING);
-            dp.setAssignedRiderId(null);
-            dp.setPickupTime(null);
-            pendingPackages.offer(dp);
-            assignPackages();
-        }
-    }
-
-    public List<Rider> getAllRiders() {
-        return new ArrayList<>(riderMap.values());
+        packageService.reassignPackage(packageId);
+        assignmentService.assignPackages(packageService.getPackageMap());
     }
 
     public List<DeliveryPackage> getAllPackages() {
-        return new ArrayList<>(packageMap.values());
+        return packageService.getAllPackages();
+    }
+
+    public List<DeliveryPackage> getCancelledPackages() {
+        return packageService.getCancelledPackages();
+    }
+
+    public List<Rider> getAllRiders() {
+        return riderService.getAllRiders();
     }
 
     public List<DeliveryPackage> getAssignments() {
-        return packageMap.values().stream().filter(p -> p.getAssignedRiderId() != null).collect(Collectors.toList());
+        return packageService.getAssignments();
     }
 
     public DeliveryPackage getPackageInfo(String packageId) {
-        return packageMap.get(packageId);
+        return packageService.getPackageInfo(packageId);
     }
 
     public String getPackageStatus(String packageId) {
-        DeliveryPackage dp = packageMap.get(packageId);
-        return dp != null ? dp.getStatus().name() : "Package not found";
+        return packageService.getPackageStatus(packageId);
     }
 
     public String getRiderStatus(String riderId) {
-        Rider rider = riderMap.get(riderId);
-        return rider != null ? rider.getStatus().name() : "Rider not found";
+        return riderService.getRiderStatus(riderId);
     }
 
     public List<DeliveryPackage> getMissedExpressDeliveries() {
-        long now = System.currentTimeMillis();
-        return packageMap.values().stream().filter(p -> p.getPriority() == PackagePriority.EXPRESS && p.getDeadline() < now && p.getStatus() != PackageStatus.DELIVERED).collect(Collectors.toList());
+        return auditService.getMissedExpressDeliveries(packageService.getAllPackages());
     }
 
     public List<DeliveryPackage> getPackagesDeliveredByRider(String riderId) {
-        long twentyFourHoursAgo = System.currentTimeMillis() - 24 * 60 * 60 * 1000;
-        return packageMap.values().stream().filter(p -> riderId.equals(p.getAssignedRiderId()) && p.getStatus() == PackageStatus.DELIVERED && p.getDeliveryTime() != null && p.getDeliveryTime() >= twentyFourHoursAgo).collect(Collectors.toList());
+        return auditService.getRiderDeliveryHistory(packageService.getAllPackages(), riderId);
     }
 }
