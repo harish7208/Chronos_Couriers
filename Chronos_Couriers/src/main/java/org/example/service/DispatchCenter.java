@@ -3,7 +3,7 @@ package org.example.service;
 import org.example.model.DeliveryPackage;
 import org.example.model.PackagePriority;
 import org.example.model.Rider;
-import org.example.model.TableView;
+import org.example.dto.TableView;
 
 import java.util.Comparator;
 import java.util.List;
@@ -13,21 +13,21 @@ import java.util.Queue;
 
 public class DispatchCenter {
 
-    private final Queue<DeliveryPackage> pendingQueue;
+    private final Queue<DeliveryPackage> pendingPackages;
     private final RiderService riderService;
     private final PackageService packageService;
     private final AssignmentService assignmentService;
     private final AuditService auditService;
 
     public DispatchCenter() {
-        this.pendingQueue = new PriorityQueue<>(
+        this.pendingPackages = new PriorityQueue<>(
                 Comparator.comparing(DeliveryPackage::getPriority).reversed()
                         .thenComparing(DeliveryPackage::getDeadline)
                         .thenComparing(DeliveryPackage::getOrderTime));
 
         this.riderService = new RiderService();
-        this.packageService = new PackageService(pendingQueue);
-        this.assignmentService = new AssignmentService(pendingQueue, riderService);
+        this.packageService = new PackageService(pendingPackages);
+        this.assignmentService = new AssignmentService(pendingPackages, riderService);
         this.auditService = new AuditService();
 
         riderService.seedPredefinedRiders();
@@ -46,20 +46,20 @@ public class DispatchCenter {
 
     public String placeOrder(PackagePriority priority, long deadline, boolean fragile) {
         String id = packageService.placeOrder(priority, deadline, fragile);
-        assignmentService.assignPackages(packageService.getPackageMap());
+        assignmentService.assignPackages(packageService.getPackages());
         return id;
     }
 
     public String registerRider(String name, boolean canHandleFragile, double reliability) {
         String id = riderService.registerRider(name, canHandleFragile, reliability);
-        assignmentService.assignPackages(packageService.getPackageMap());
+        assignmentService.assignPackages(packageService.getPackages());
         return id;
     }
 
     public void updateRiderStatus(String riderId, boolean available) {
         riderService.updateRiderStatus(riderId, available,
-                packageService.getPackageMap(), pendingQueue);
-        assignmentService.assignPackages(packageService.getPackageMap());
+                packageService.getPackages(), pendingPackages);
+        assignmentService.assignPackages(packageService.getPackages());
     }
 
     public void simulatePickup(String packageId) {
@@ -76,7 +76,7 @@ public class DispatchCenter {
 
     public void reassignPackage(String packageId) {
         packageService.reassignPackage(packageId);
-        assignmentService.assignPackages(packageService.getPackageMap());
+        assignmentService.assignPackages(packageService.getPackages());
     }
 
     public List<DeliveryPackage> getAllPackages() {

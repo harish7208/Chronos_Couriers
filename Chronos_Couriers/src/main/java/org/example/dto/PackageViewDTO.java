@@ -1,7 +1,6 @@
 package org.example.dto;
 
 import org.example.model.DeliveryPackage;
-import org.example.model.TableView;
 
 public class PackageViewDTO implements TableView {
     private final DeliveryPackage pkg;

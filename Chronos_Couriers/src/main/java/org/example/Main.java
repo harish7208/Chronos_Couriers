@@ -10,14 +10,14 @@ public class Main {
     public static void main(String[] args) {
         DispatchCenter dispatchCenter = new DispatchCenter();
         Scanner scanner = new Scanner(System.in);
-        MenuHandler menu = new MenuHandler(dispatchCenter, scanner);
+        MenuHandler menuHandler = new MenuHandler(dispatchCenter, scanner);
 
         boolean run = true;
         while (run) {
-            menu.displayMenu();
+            menuHandler.displayMenu();
             try {
                 int choice = Integer.parseInt(scanner.nextLine());
-                run = menu.handleChoice(choice);
+                run = menuHandler.handleChoice(choice);
             } catch (Exception e) {
                 System.out.println("Invalid input. Please enter a valid number.");
             }

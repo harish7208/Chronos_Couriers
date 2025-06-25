@@ -114,12 +114,11 @@ public class MenuHandler {
         System.out.print("Rider Name: ");
         String name = scanner.nextLine();
         boolean canFragile = InputValidator.readBoolean(scanner, "Can Handle Fragile");
-        System.out.print("Reliability Rating (0.0 to 1.0): ");
+        System.out.print("Reliability Rating (1.0 to 10.0): ");
         double reliability = Double.parseDouble(scanner.nextLine());
         String riderId = dispatchCenter.registerRider(name, canFragile, reliability);
         System.out.println("Rider registered successfully.");
-        DispatchCenter.printTable(List.of(new RiderViewDTO(dispatchCenter.getAllRiders().stream()
-                .filter(r -> r.getId().equals(riderId)).findFirst().get())));
+        DispatchCenter.printTable(List.of(new RiderViewDTO(dispatchCenter.getAllRiders().stream().filter(r -> r.getId().equals(riderId)).findFirst().get())));
     }
 
     private void updateRiderStatus() {
@@ -132,22 +131,22 @@ public class MenuHandler {
 
     private void updatePackageStatus() {
         System.out.print("Package ID: ");
-        String pid = scanner.nextLine();
-        DeliveryPackage dp = dispatchCenter.getPackageInfo(pid);
-        if (dp == null) {
+        String packageId = scanner.nextLine();
+        DeliveryPackage deliveryPackage = dispatchCenter.getPackageInfo(packageId);
+        if (deliveryPackage == null) {
             System.out.println("Package not found.");
             return;
         }
-        if (dp.getStatus() == PackageStatus.ASSIGNED) {
+        if (deliveryPackage.getStatus() == PackageStatus.ASSIGNED) {
             System.out.println("1. Pick Up\n2. Cancel");
-            int opt = Integer.parseInt(scanner.nextLine());
-            if (opt == 1) dispatchCenter.simulatePickup(pid);
-            else dispatchCenter.cancelPackage(pid);
-        } else if (dp.getStatus() == PackageStatus.PICKED_UP) {
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 1) dispatchCenter.simulatePickup(packageId);
+            else dispatchCenter.cancelPackage(packageId);
+        } else if (deliveryPackage.getStatus() == PackageStatus.PICKED_UP) {
             System.out.println("1. Deliver\n2. Cancel");
-            int opt = Integer.parseInt(scanner.nextLine());
-            if (opt == 1) dispatchCenter.simulateDelivery(pid);
-            else dispatchCenter.cancelPackage(pid);
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 1) dispatchCenter.simulateDelivery(packageId);
+            else dispatchCenter.cancelPackage(packageId);
         } else {
             System.out.println("Status update not allowed in current state.");
         }

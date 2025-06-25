@@ -1,7 +1,6 @@
 package org.example.dto;
 
 import org.example.model.Rider;
-import org.example.model.TableView;
 
 public class RiderViewDTO implements TableView {
     private final Rider rider;

@@ -1,11 +1,11 @@
 package org.example.model;
 
 public class DeliveryPackage {
-    private String id;
-    private PackagePriority priority;
-    private long deadline;
-    private long orderTime;
-    private boolean fragile;
+    private final String id;
+    private final PackagePriority priority;
+    private final long deadline;
+    private final long orderTime;
+    private final boolean fragile;
     private PackageStatus status;
     private Long pickupTime;
     private Long deliveryTime;

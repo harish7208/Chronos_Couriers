@@ -1,15 +1,14 @@
 package org.example.model;
 
-import java.util.Map;
-import java.util.Queue;
 
 public class Rider {
-    private String id;
-    private String name;
+    private final String id;
+    private final String name;
     private RiderStatus status;
     private double reliabilityRating;
-    private boolean canHandleFragile;
+    private final boolean canHandleFragile;
     private long lastUpdatedTime;
+    private int completedOrders;
 
     public Rider(String id, String name, boolean canHandleFragile, double reliabilityRating) {
         this.id = id;
@@ -18,6 +17,7 @@ public class Rider {
         this.reliabilityRating = reliabilityRating;
         this.status = RiderStatus.AVAILABLE;
         this.lastUpdatedTime = System.currentTimeMillis();
+        this.completedOrders = 1;
     }
 
     public String getId() {
@@ -45,27 +45,42 @@ public class Rider {
         return reliabilityRating;
     }
 
+    public int getCompletedOrders() {
+        return completedOrders;
+    }
+
     public long getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
-    public void updateStatus(boolean available, Map<String, DeliveryPackage> packageMap, Queue<DeliveryPackage> pendingQueue) {
-        if (!available) {
-            goOfflineGracefully(packageMap, pendingQueue);
-        } else {
-            setStatus(RiderStatus.AVAILABLE);
-        }
+    public void updateReliability(double newRating) {
+        this.reliabilityRating = (this.reliabilityRating * this.completedOrders + newRating) / (this.completedOrders + 1);
+        if (this.reliabilityRating < 0) this.reliabilityRating = 0;
+        this.completedOrders++;
     }
 
-    public void goOfflineGracefully(Map<String, DeliveryPackage> packageMap, Queue<DeliveryPackage> pendingQueue) {
-        for (DeliveryPackage p : packageMap.values()) {
-            if (this.id.equals(p.getAssignedRiderId()) && (p.getStatus() == PackageStatus.ASSIGNED || p.getStatus() == PackageStatus.PICKED_UP)) {
-                p.setStatus(PackageStatus.FAILED);
-                p.setAssignedRiderId(null);
-                pendingQueue.offer(p);
+    public void penalizeReliability(double penalty) {
+        this.reliabilityRating = (this.reliabilityRating * this.completedOrders + penalty) / (this.completedOrders + 1);
+        if (this.reliabilityRating < 0) this.reliabilityRating = 0;
+        this.completedOrders++;
+    }
+
+    public void updateRiderStatusOffline(java.util.Map<String, DeliveryPackage> packageMap, java.util.Queue<DeliveryPackage> pendingQueue) {
+        for (DeliveryPackage deliveryPackage : packageMap.values()) {
+            if (this.id.equals(deliveryPackage.getAssignedRiderId()) && (deliveryPackage.getStatus() == PackageStatus.ASSIGNED || deliveryPackage.getStatus() == PackageStatus.PICKED_UP)) {
+                deliveryPackage.setStatus(PackageStatus.FAILED);
+                deliveryPackage.setAssignedRiderId(null);
+                pendingQueue.offer(deliveryPackage);
             }
         }
         setStatus(RiderStatus.OFFLINE);
     }
 
+    public void updateStatus(boolean available, java.util.Map<String, DeliveryPackage> packageMap, java.util.Queue<DeliveryPackage> pendingQueue) {
+        if (!available) {
+            updateRiderStatusOffline(packageMap, pendingQueue);
+        } else {
+            setStatus(RiderStatus.AVAILABLE);
+        }
+    }
 }

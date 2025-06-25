@@ -12,28 +12,28 @@ import java.util.Queue;
 
 public class AssignmentService {
 
-    private final Queue<DeliveryPackage> pendingQueue;
+    private final Queue<DeliveryPackage> pendingPackages;
     private final RiderService riderService;
 
-    public AssignmentService(Queue<DeliveryPackage> pendingQueue, RiderService riderService) {
-        this.pendingQueue = pendingQueue;
+    public AssignmentService(Queue<DeliveryPackage> pendingPackages, RiderService riderService) {
+        this.pendingPackages = pendingPackages;
         this.riderService = riderService;
     }
 
     public void assignPackages(Map<String, DeliveryPackage> packageMap) {
-        List<DeliveryPackage> assigned = new ArrayList<>();
+        List<DeliveryPackage> assignedPackages = new ArrayList<>();
 
-        for (DeliveryPackage p : pendingQueue) {
+        for (DeliveryPackage deliveryPackage : pendingPackages) {
             List<Rider> sortedRiders = new ArrayList<>(riderService.getAvailableRidersSorted());
-            Rider selected = null;
+            Rider rider = null;
 
-            if (p.isFragile()) {
-                selected = sortedRiders.stream()
+            if (deliveryPackage.isFragile()) {
+                rider = sortedRiders.stream()
                         .filter(Rider::canHandleFragile)
                         .findFirst()
                         .orElse(null);
             } else {
-                selected = sortedRiders.stream()
+                rider = sortedRiders.stream()
                         .filter(r -> !r.canHandleFragile())
                         .findFirst()
                         .orElse(
@@ -43,14 +43,14 @@ public class AssignmentService {
                                         .orElse(null));
             }
 
-            if (selected != null) {
-                p.setAssignedRiderId(selected.getId());
-                p.setStatus(PackageStatus.ASSIGNED);
-                selected.setStatus(RiderStatus.BUSY);
-                assigned.add(p);
+            if (rider != null) {
+                deliveryPackage.setAssignedRiderId(rider.getId());
+                deliveryPackage.setStatus(PackageStatus.ASSIGNED);
+                rider.setStatus(RiderStatus.BUSY);
+                assignedPackages.add(deliveryPackage);
             }
         }
 
-        pendingQueue.removeAll(assigned);
+        pendingPackages.removeAll(assignedPackages);
     }
 }
