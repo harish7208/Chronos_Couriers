@@ -69,6 +69,63 @@ The CLI provides the following:
 15. Exit
 
 
+---
+
+## 📷 Screenshots
+
+Couple of Sample Outputs 
+
+To View All available Riders : 
+
+![image (1)](https://github.com/user-attachments/assets/a14c5cfb-1052-4189-a483-89ac50bdf13c)
+
+To Place Order : 
+
+![image](https://github.com/user-attachments/assets/64828e9a-4bbf-4549-bd70-962035875fb9)
+
+To check Package Assignment : 
+
+![image (1)](https://github.com/user-attachments/assets/b2990509-8ea3-44ff-9a7a-695882f3d89c)
+
+To check Rider Status : 
+
+![image (2)](https://github.com/user-attachments/assets/8efca1dc-e12e-4834-895d-c288c5893036)
+
+![image (2)](https://github.com/user-attachments/assets/56450109-6c32-4b5f-959d-d0e1cf006521)
+
+To Update Package Status : 
+
+![image (3)](https://github.com/user-attachments/assets/1a71341a-8ceb-4d35-b8bc-5df06a577508)
+
+![image (4)](https://github.com/user-attachments/assets/b51bc108-c1e2-4900-886a-2b3d36969641)
+
+![image (5)](https://github.com/user-attachments/assets/fbc323b1-25f8-4bd5-9e5b-9535e7dd800c)
+
+![image (3)](https://github.com/user-attachments/assets/324624e2-67be-43dd-9956-006686cf4b9b)
+
+After Successful Delivery, Rating of Rider will update : 
+
+![image (6)](https://github.com/user-attachments/assets/e0d41dbe-f4f3-4521-b2c9-7e0b818e609a)
+
+To Update Rider Availability Status : 
+
+![image (4)](https://github.com/user-attachments/assets/8ccd2a26-7a72-495f-a539-a678a4601b6d)
+
+![image (5)](https://github.com/user-attachments/assets/c622e767-dae3-408a-a476-79a083f7d334)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 🛠️ How to Run
 
 1. Open in IntelliJ, Eclipse, or any Java IDE.
