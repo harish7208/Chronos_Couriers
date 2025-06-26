@@ -3,10 +3,10 @@ package org.example.dto;
 import org.example.model.DeliveryPackage;
 
 public class AssignmentViewDTO implements TableView {
-    private final DeliveryPackage pkg;
+    private final DeliveryPackage deliveryPackage;
 
-    public AssignmentViewDTO(DeliveryPackage pkg) {
-        this.pkg = pkg;
+    public AssignmentViewDTO(DeliveryPackage deliveryPackage) {
+        this.deliveryPackage = deliveryPackage;
     }
 
     @Override
@@ -17,7 +17,7 @@ public class AssignmentViewDTO implements TableView {
 
     @Override
     public void printRow() {
-        System.out.printf("%-10s %-15s %-15s %-10s\n", pkg.getId(), pkg.getAssignedRiderId(), pkg.getStatus(), pkg.getPriority());
+        System.out.printf("%-10s %-15s %-15s %-10s\n", deliveryPackage.getId(), deliveryPackage.getAssignedRiderId(), deliveryPackage.getStatus(), deliveryPackage.getPriority());
     }
 }
 

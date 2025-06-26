@@ -49,4 +49,23 @@ public class InputValidator {
             }
         }
     }
+
+    public static double readReliabilityRating(Scanner scanner) {
+        double rating = -1;
+        while (rating < 1.0 || rating > 10.0) {
+            System.out.print("Reliability Rating (1.0 to 10.0): ");
+            String input = scanner.nextLine();
+            try {
+                rating = Double.parseDouble(input);
+                if (rating < 1.0 || rating > 10.0) {
+                    System.out.println("Rating must be between 1.0 and 10.0.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number. Please enter a decimal between 1.0 and 10.0.");
+            }
+        }
+        return rating;
+    }
+
+
 }

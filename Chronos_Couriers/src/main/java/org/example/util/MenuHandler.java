@@ -113,13 +113,22 @@ public class MenuHandler {
     private void registerRider() {
         System.out.print("Rider Name: ");
         String name = scanner.nextLine();
+
         boolean canFragile = InputValidator.readBoolean(scanner, "Can Handle Fragile");
-        System.out.print("Reliability Rating (1.0 to 10.0): ");
-        double reliability = Double.parseDouble(scanner.nextLine());
+
+        double reliability = InputValidator.readReliabilityRating(scanner);
+
         String riderId = dispatchCenter.registerRider(name, canFragile, reliability);
         System.out.println("Rider registered successfully.");
-        DispatchCenter.printTable(List.of(new RiderViewDTO(dispatchCenter.getAllRiders().stream().filter(r -> r.getId().equals(riderId)).findFirst().get())));
+
+        DispatchCenter.printTable(List.of(
+                new RiderViewDTO(dispatchCenter.getAllRiders().stream()
+                        .filter(r -> r.getId().equals(riderId))
+                        .findFirst()
+                        .get())
+        ));
     }
+
 
     private void updateRiderStatus() {
         System.out.print("Rider ID: ");
