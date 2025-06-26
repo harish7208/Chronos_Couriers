@@ -1,4 +1,4 @@
-# Chronos Couriers - Java CLI Courier Dispatch System
+# Chronos Couriers
 
 Chronos Couriers is a console-based Java application designed to simulate a package dispatch and delivery system. It features rider registration, intelligent rider assignment, package tracking, reliability scoring, and more—all with a clean, modular architecture.
 
@@ -46,6 +46,47 @@ src/
                     └── RiderServiceTest.java
  ```
 
+
+---
+
+## 📦 Package and 🧍 Rider Assignment Logic 
+
+The system automatically assigns available riders to packages based on specific criteria and priorities. Here's how the logic works:
+
+# ✅ Package Assignment Flow
+
+When a new package is placed or a cancelled package is reassigned, the system:
+1. Adds the package to a pending queue (priority-based).
+2. Attempts to assign it to the most suitable available rider using AssignmentService.
+
+# ⚙️ Package Queue Priority
+The pendingQueue is a PriorityQueue sorted by:
+   1. Package Priority (EXPRESS > STANDARD)
+   2. Deadline (earlier deadlines are prioritized)
+   3. Order Time (older orders are prioritized)
+
+# 🧠 Rider Selection Logic
+
+# 🎯 Priority Sorting:
+Riders are sorted by descending reliability rating (10.0 to 1.0 scale).
+
+📌 Assignment Rules:
+
+🔹 For Non-Fragile Packages:
+1. Look for a rider who:
+    1. Is available
+    2. Cannot handle fragile items (to preserve fragile-capable riders)
+    3. Has the highest reliability
+
+2. If no such rider is available, assign to a rider who:
+     1. Can handle fragile items
+     2. Has the highest reliability
+
+🔸 For Fragile Packages:
+1. Only consider riders who:
+     1. Can handle fragile items
+     2. Are available
+     3. Have the highest reliability
 
 ---
 
