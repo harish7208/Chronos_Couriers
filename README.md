@@ -113,16 +113,9 @@ To Update Rider Availability Status :
 
 ![image (5)](https://github.com/user-attachments/assets/c622e767-dae3-408a-a476-79a083f7d334)
 
+To Register Rider : 
 
-
-
-
-
-
-
-
-
-
+![image (7)](https://github.com/user-attachments/assets/a3f371db-f19d-4060-84f4-04f81ca54c49)
 
 
 
